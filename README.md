@@ -36,8 +36,6 @@ asset:
   check: "proxmoxcluster"
   config:
     address: "192.168.1.2"
-    node: "pve"
-    vmid: 100
 ```
 
 Run the probe with the `DRY_RUN` environment variable set the the yaml file above.

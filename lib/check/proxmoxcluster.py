@@ -15,12 +15,6 @@ async def check_proxmoxcluster(
         address = asset.name
     port = config.get('port', DEFAULT_PORT)
     ssl = config.get('ssl', False)
-    node = config.get('node')
-    if node is None:
-        raise CheckException('invalid config: missing `node`')
-    vmid = config.get('vmid')
-    if vmid is None:
-        raise CheckException('invalid config: missing `vmid`')
 
     username = asset_config.get('username')
     realm = asset_config.get('realm')
@@ -33,49 +27,34 @@ async def check_proxmoxcluster(
         'Authorization': f'PVEAPIToken={username}@{realm}!{token_id}={token}'
     }
     base_url = f'https://{address}:{port}'
-    url = f'{base_url}/api2/json/nodes/{node}/qemu/{vmid}/status/current'
+    url = f'{base_url}/api2/json/cluster/resources'
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers, ssl=ssl) as resp:
             resp.raise_for_status()
             data = await resp.json()
 
-    vm = data['data']
-    nics = vm.get('nics')
-    item = {
-        'name': str(vm['vmid']),  # str
-        # 'ha': vm['ha'],  # TODO how to interpret {managed: 0}?
-        'vmid': vm['vmid'],  # ???
-        'balloon': vm.get('balloon'),  # ???
-        # 'ballooninfo': vm.get('ballooninfo'),  # TODO many metrics
-        # 'blockstat': vm.get('blockstat'),  # TODO many metrics
-        'cpu': vm.get('cpu'),  # ???
-        'cpus': vm.get('cpus'),  # ???
-        'disk': vm.get('disk'),  # ???
-        'diskread': vm.get('diskread'),  # ???
-        'diskwrite': vm.get('diskwrite'),  # ???
-        'freemem': vm.get('freemem'),  # ???
-        'maxdisk': vm.get('maxdisk'),  # ???
-        'maxmem': vm.get('maxmem'),  # ???
-        'mem': vm.get('mem'),  # ???
-        'netin': vm.get('netin'),  # ???
-        'netout': vm.get('netout'),  # ???
-        'pid': vm.get('pid'),  # ???
-        # 'proxmox-support': vm.get('proxmox-support'),  # TODO relevant?
-        'qmpstatus': vm.get('qmpstatus'),  # ???
-        'running_machine': vm.get('running-machine'),  # ???
-        'running_qemu': vm.get('running-qemu'),  # ???
-        'status': vm['status'],  # ???
-        'uptime': vm.get('uptime'),  # ???
-        'vm_name': vm.get('name'),  # ???
+    guests = [{
+        'name': str(n['vmid']),  # str
+        'node': n.get('node'),  # str
+        'status': n.get('status'),  # str
+        'vm_name': n.get('name'),  # str
+    } for n in data['data'] if n['type'] == 'qemu']
+    nodes = [{
+        'name': n['node'],  # str
+        'cgroup_mode': n.get('cgroup-mode'),  # int
+        'cpu': n.get('cpu'),  # float
+        'disk': n.get('disk'),  # int
+        'id': n.get('id'),  # str
+        'level': n.get('level'),  # str
+        'maxcpu': n.get('maxcpu'),  # int
+        'maxdisk': n.get('maxdisk'),  # int
+        'maxmem': n.get('maxmem'),  # int
+        'mem': n.get('mem'),  # int
+        'node': n.get('node'),  # int
+        'status': n.get('status'),  # str
+        'uptime': n.get('uptime'),  # int
+    } for n in data['data'] if n['type'] == 'node']
+    return {
+        'guests': guests,
+        'nodes': nodes,
     }
-    state = {
-        'guest': [item],
-    }
-    if nics is not None:
-        state['nics'] = [{
-            'name': name,  # str
-            'netin': n['netin'],  # ???
-            'netout': n['netout'],  # ???
-        } for name, n in nics.items()]
-
-    return state
