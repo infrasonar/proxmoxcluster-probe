@@ -42,16 +42,9 @@ async def check_proxmoxcluster(
     nodes = [{
         'name': n['node'],  # str
         'cgroup_mode': n.get('cgroup-mode'),  # int
-        'cpu': n.get('cpu'),  # float
-        'disk': n.get('disk'),  # int
         'id': n.get('id'),  # str
         'level': n.get('level'),  # str
-        'maxcpu': n.get('maxcpu'),  # int
-        'maxdisk': n.get('maxdisk'),  # int
-        'maxmem': n.get('maxmem'),  # int
-        'mem': n.get('mem'),  # int
         'status': n.get('status'),  # str
-        'uptime': n.get('uptime'),  # int
     } for n in data['data'] if n['type'] == 'node']
     return {
         'guests': guests,
