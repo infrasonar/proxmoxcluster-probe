@@ -6,7 +6,7 @@ from libprobe.exceptions import CheckException
 DEFAULT_PORT = 8006
 
 
-async def check_proxmoxcluster(
+async def check_cluster(
         asset: Asset,
         asset_config: dict,
         config: dict) -> dict:
