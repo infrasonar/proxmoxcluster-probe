@@ -50,7 +50,6 @@ async def check_proxmoxcluster(
         'maxdisk': n.get('maxdisk'),  # int
         'maxmem': n.get('maxmem'),  # int
         'mem': n.get('mem'),  # int
-        'node': n.get('node'),  # int
         'status': n.get('status'),  # str
         'uptime': n.get('uptime'),  # int
     } for n in data['data'] if n['type'] == 'node']
