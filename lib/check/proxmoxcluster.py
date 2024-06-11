@@ -17,7 +17,7 @@ async def check_proxmoxcluster(
     ssl = config.get('ssl', False)
 
     username = asset_config.get('username')
-    realm = asset_config.get('realm')
+    realm = asset_config.get('realm', 'pam')
     token_id = asset_config.get('token_id')
     token = asset_config.get('secret')
     if None in (username, realm, token_id, token):
