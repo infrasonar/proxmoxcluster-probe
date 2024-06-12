@@ -35,6 +35,7 @@ async def check_cluster(
 
     guests = [{
         'name': str(n['vmid']),  # str
+        'id': n.get('id'),  # str
         'node': n.get('node'),  # str
         'status': n.get('status'),  # str
         'vm_name': n.get('name'),  # str
