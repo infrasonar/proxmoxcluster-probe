@@ -43,7 +43,7 @@ proxmoxguest:
 ## Dry run
 
 Available checks:
-- `proxmoxcluster`
+- `cluster`
 
 Create a yaml file, for example _(test.yaml)_:
 
