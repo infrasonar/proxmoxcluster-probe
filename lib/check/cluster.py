@@ -1,6 +1,7 @@
 import aiohttp
 from libprobe.asset import Asset
 from libprobe.exceptions import CheckException
+from ..connector import get_connector
 
 
 DEFAULT_PORT = 8006
@@ -28,7 +29,7 @@ async def check_cluster(
     }
     base_url = f'https://{address}:{port}'
     url = f'{base_url}/api2/json/cluster/resources'
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(connector=get_connector()) as session:
         async with session.get(url, headers=headers, ssl=ssl) as resp:
             resp.raise_for_status()
             data = await resp.json()
