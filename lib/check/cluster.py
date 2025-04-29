@@ -58,7 +58,6 @@ async def check_cluster(
         else:
             logging.warning(f'unsupported backup type: {item["type"]}')
 
-
     return {
         'cluster': [cluster],
         'nodes': nodes,
