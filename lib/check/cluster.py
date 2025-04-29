@@ -64,7 +64,7 @@ async def check_cluster(
         raise CheckException(msg)
 
     return {
-        'cluster': cluster,
+        'cluster': [cluster],
         'nodes': nodes,
         'backups': backups,
     }
