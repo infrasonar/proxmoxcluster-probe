@@ -1,54 +1,67 @@
-import aiohttp
+import logging
 from libprobe.asset import Asset
-from libprobe.exceptions import CheckException
-from ..connector import get_connector
-
-
-DEFAULT_PORT = 8006
+from ..helpers import api_request
 
 
 async def check_cluster(
         asset: Asset,
         asset_config: dict,
         config: dict) -> dict:
-    address = config.get('address')
-    if not address:
-        address = asset.name
-    port = config.get('port', DEFAULT_PORT)
-    ssl = config.get('ssl', False)
+    uri = '/api2/json/json/cluster/status'
+    data = await api_request(asset, asset_config, config, uri)
 
-    username = asset_config.get('username')
-    realm = asset_config.get('realm', 'pam')
-    token_id = asset_config.get('token_id')
-    token = asset_config.get('secret')
-    if None in (username, realm, token_id, token):
-        raise CheckException('missing credentials')
+    cluster = {}
+    nodes = []
+    backups = []
+    for item in data['data']:
+        if item['type'] == 'cluster':
+            cluster['name'] = item['name']  # str
+            cluster['nodes'] = item['nodes']  # int
+            cluster['version'] = item['version']  # int
+            cluster['quorate'] = item['quorate']  # int
+            cluster['id'] = item['id']  # str
+        elif item['type'] == 'node':
+            nodes.append({
+                'name': item['name'],  # str
+                'id': item['id'],  # str
+                'ip': item['ip'],  # str
+                'level': item['level'],  # str
+            })
 
-    headers = {
-        'Authorization': f'PVEAPIToken={username}@{realm}!{token_id}={token}'
-    }
-    base_url = f'https://{address}:{port}'
-    url = f'{base_url}/api2/json/cluster/resources'
-    async with aiohttp.ClientSession(connector=get_connector()) as session:
-        async with session.get(url, headers=headers, ssl=ssl) as resp:
-            resp.raise_for_status()
-            data = await resp.json()
+    uri = '/api2/json/json/cluster/ha/status/manager_status'
+    data = await api_request(asset, asset_config, config, uri)
 
-    guests = [{
-        'name': str(n['vmid']),  # str
-        'id': n.get('id'),  # str
-        'node': n.get('node'),  # str
-        'status': n.get('status'),  # str
-        'vm_name': n.get('name'),  # str
-    } for n in data['data'] if n['type'] == 'qemu']
-    nodes = [{
-        'name': n['node'],  # str
-        'cgroup_mode': n.get('cgroup-mode'),  # int
-        'id': n.get('id'),  # str
-        'level': n.get('level'),  # str
-        'status': n.get('status'),  # str
-    } for n in data['data'] if n['type'] == 'node']
+    lrm_status = data['data']['lrm_status']
+    node_status = data['data']['manager_status']['node_status']
+    for node in nodes:
+        item = lrm_status[node['name']]
+        node['mode'] = item['mode']  # str
+        node['state'] = item['state']  # str
+
+        item = node_status[node['name']]
+        node['status'] = item['status']  # str
+
+    cluster['master_node'] = \
+        data['data']['manager_status']['master_node']  # str
+
+    uri = '/api2/json/json/cluster/backup'
+    data = await api_request(asset, asset_config, config, uri)
+    for item in data['data']:
+        if item['type'] == 'vzdump':
+            backups.append({
+                'name': item['id'],  # str
+                'type': item['type'],  # str
+                'schedule': item['schedule'],  # str
+                'next_run': item['next-run'],  # int (unix timestamp)
+                'mode': item['mode'],  # str
+                'storage': item['storage'],  # str
+                'enabled': bool(item['enabled']),  # int->bool
+            })
+        else:
+            logging.warning(f'unsupported backup type: {item["type"]}')
+
     return {
-        'guests': guests,
+        'cluster': cluster,
         'nodes': nodes,
+        'backups': backups,
     }
