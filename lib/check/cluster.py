@@ -38,9 +38,7 @@ async def check_cluster(
             item = lrm_status[node['name']]
             node['mode'] = item['mode']  # str
             node['state'] = item['state']  # str
-
-            item = node_status[node['name']]
-            node['status'] = item['status']  # str
+            node['status'] = node_status[node['name']]  # str
 
         cluster['master_node'] = \
             data['data']['manager_status']['master_node']  # str
