@@ -27,7 +27,7 @@ async def check_cluster(
                     'name': item['name'],  # str
                     'id': item['id'],  # str
                     'ip': item['ip'],  # str
-                    'level': item['leve'],  # str
+                    'level': item['level'],  # str
                 })
 
         uri = '/api2/json/cluster/ha/status/manager_status'
