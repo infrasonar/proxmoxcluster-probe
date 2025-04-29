@@ -29,7 +29,7 @@ async def api_request(
         'Authorization': f'PVEAPIToken={username}@{realm}!{token_id}={token}'
     }
     base_url = f'https://{address}:{port}'
-    url = f'{base_url}/api2/json/json/cluster/status'
+    url = f'{base_url}{uri}'
     async with aiohttp.ClientSession(connector=get_connector()) as session:
         async with session.get(url, headers=headers, ssl=ssl) as resp:
             resp.raise_for_status()
