@@ -1,4 +1,5 @@
 import logging
+from libprobe import logger
 from libprobe.asset import Asset
 from libprobe.exceptions import CheckException
 from ..helpers import api_request
@@ -26,7 +27,7 @@ async def check_cluster(
                     'name': item['name'],  # str
                     'id': item['id'],  # str
                     'ip': item['ip'],  # str
-                    'level': item['level'],  # str
+                    'level': item['leve'],  # str
                 })
 
         uri = '/api2/json/cluster/ha/status/manager_status'
@@ -58,10 +59,9 @@ async def check_cluster(
                 })
             else:
                 logging.warning(f'unsupported backup type: {item["type"]}')
-    except Exception as e:
-        msg = str(e) or type(e).__name__
-        logging.exception(msg)
-        raise CheckException(msg)
+    except Exception:
+        logger.exception()
+        raise
 
     return {
         'cluster': [cluster],
