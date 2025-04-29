@@ -7,7 +7,7 @@ async def check_cluster(
         asset: Asset,
         asset_config: dict,
         config: dict) -> dict:
-    uri = '/api2/json/json/cluster/status'
+    uri = '/api2/json/cluster/status'
     data = await api_request(asset, asset_config, config, uri)
 
     cluster = {}
@@ -28,7 +28,7 @@ async def check_cluster(
                 'level': item['level'],  # str
             })
 
-    uri = '/api2/json/json/cluster/ha/status/manager_status'
+    uri = '/api2/json/cluster/ha/status/manager_status'
     data = await api_request(asset, asset_config, config, uri)
 
     lrm_status = data['data']['lrm_status']
@@ -44,7 +44,7 @@ async def check_cluster(
     cluster['master_node'] = \
         data['data']['manager_status']['master_node']  # str
 
-    uri = '/api2/json/json/cluster/backup'
+    uri = '/api2/json/cluster/backup'
     data = await api_request(asset, asset_config, config, uri)
     for item in data['data']:
         if item['type'] == 'vzdump':
