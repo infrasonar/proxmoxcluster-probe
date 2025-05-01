@@ -58,34 +58,8 @@ async def check_cluster(
         else:
             logging.warning(f'unsupported backup type: {item["type"]}')
 
-    # vm = []
-    # ct = []
-    # uri = '/resources'
-    # data = await api_request(asset, asset_config, config, uri)
-    # for item in data['data']:
-    #     if item['type'] == 'qemu':
-    #         vm.append({
-    #             'name': str(item['vmid']),  # str
-    #             'vmid': item['vmid'],  # int
-    #             'vm_name': item['name'],  # str
-    #             'node': item['node'],  # str
-    #             'status': item['status'],  # str
-    #             'uptime': item['uptime'],  # int
-    #         })
-    #     elif item['type'] == 'lxc':
-    #         ct.append({
-    #             'name': str(item['vmid']),  # str
-    #             'vmid': item['vmid'],  # int
-    #             'ct_name': item['name'],  # str
-    #             'node': item['node'],  # str
-    #             'status': item['status'],  # str
-    #             'uptime': item['uptime'],  # int
-    #         })
-
     return {
         'cluster': [cluster],
         'nodes': nodes,
         'backups': backups,
-        # 'vm': vm,
-        # 'ct': ct,
     }
