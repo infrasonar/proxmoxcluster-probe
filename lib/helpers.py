@@ -11,7 +11,8 @@ async def api_request(
         asset: Asset,
         asset_config: dict,
         config: dict,
-        uri: str) -> dict:
+        uri: str,
+        target: str = 'cluster') -> dict:
     address = config.get('address')
     if not address:
         address = asset.name
@@ -28,8 +29,18 @@ async def api_request(
     headers = {
         'Authorization': f'PVEAPIToken={username}@{realm}!{token_id}={token}'
     }
-    base_url = f'https://{address}:{port}'
-    url = f'{base_url}{uri}'
+
+    if target == 'cluster':
+        base_uri = f'https://{address}:{port}/api2/json/cluster'
+    elif target == 'node':
+        node = config.get('node')
+        if node is None:
+            raise CheckException('invalid config: missing `node`')
+        base_uri = f'https://{address}:{port}/api2/json/nodes/{node}'
+    else:
+        raise Exception(f'invalid target: {target}')
+
+    url = f'{base_uri}{uri}'
     async with aiohttp.ClientSession(connector=get_connector()) as session:
         async with session.get(url, headers=headers, ssl=ssl) as resp:
             resp.raise_for_status()
