@@ -37,6 +37,16 @@ async def api_request(
         if node is None:
             raise CheckException('invalid config: missing `node`')
         base_uri = f'https://{address}:{port}/api2/json/nodes/{node}'
+    elif target in ('qemu', 'lxc'):
+        node = config.get('node')
+        if node is None:
+            raise CheckException('invalid config: missing `node`')
+        vmid = config.get('vmid')
+        if vmid is None:
+            raise CheckException('invalid config: missing `vmid`')
+        base_uri = \
+            f'https://{address}:{port}/api2/json/nodes/{node}/{target}/{vmid}'
+
     else:
         raise Exception(f'invalid target: {target}')
 
