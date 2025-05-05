@@ -1,4 +1,3 @@
-import logging
 from libprobe.asset import Asset
 from ..helpers import api_request
 
