@@ -1,4 +1,3 @@
-import logging
 from libprobe.asset import Asset
 from libprobe.exceptions import CheckException
 from ..helpers import api_request
@@ -33,7 +32,8 @@ async def check_ha(
 
     ha = {
         'name': 'ha',
-        'master_node': data['data']['manager_status']['master_node']  # str
+        'master_node': data['data']['manager_status']['master_node'],  # str
+        'quorate': int(data['data']['quorum']['quorate']),  # str -> int
     }
 
     return {
