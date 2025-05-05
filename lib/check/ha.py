@@ -32,6 +32,7 @@ async def check_ha(
         })
 
     ha = {
+        'name': 'ha',
         'master_node': data['data']['manager_status']['master_node']  # str
     }
 
