@@ -1,18 +1,18 @@
 from libprobe.probe import Probe
-from lib.check.cluster import check_cluster
-from lib.check.ha import check_ha
-from lib.check.backup import check_backup
-from lib.check.guests import check_guests
+from lib.check.cluster import CheckCluster
+from lib.check.ha import CheckHA
+from lib.check.backup import CheckBackup
+from lib.check.guests import CheckGuests
 from lib.version import __version__ as version
 
 
 if __name__ == '__main__':
-    checks = {
-        'cluster': check_cluster,
-        'ha': check_ha,
-        'backup': check_backup,
-        'guests': check_guests,
-    }
+    checks = (
+        CheckCluster,
+        CheckHA,
+        CheckBackup,
+        CheckGuests,
+    )
 
     probe = Probe("proxmoxcluster", version, checks)
 

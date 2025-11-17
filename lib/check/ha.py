@@ -1,42 +1,45 @@
 from libprobe.asset import Asset
+from libprobe.check import Check
 from libprobe.exceptions import CheckException
 from ..helpers import api_request
 
 
-async def check_ha(
-        asset: Asset,
-        asset_config: dict,
-        config: dict) -> dict:
+class CheckHA(Check):
+    key = 'ha'
 
-    uri = '/ha/status/manager_status'
-    data = await api_request(asset, asset_config, config, uri)
+    @staticmethod
+    async def run(asset: Asset, local_config: dict, config: dict) -> dict:
 
-    try:
-        lrm_status = data['data']['lrm_status']
-        node_status = data['data']['manager_status']['node_status']
-    except Exception:
-        raise CheckException(
-            'Failed to read High Availability (HA) status. This check '
-            'requires HA to be enabled on the cluster. Either ensure '
-            'high availability is configured and running, or disable '
-            'the `ha` check.')
+        uri = '/ha/status/manager_status'
+        data = await api_request(asset, local_config, config, uri)
 
-    nodes = []
-    for name, item in lrm_status.items():
-        nodes.append({
-            'name': name,
-            'mode': item['mode'],  # str
-            'state': item['state'],  # str
-            'status': node_status[name],  # str
-        })
+        try:
+            lrm_status = data['data']['lrm_status']
+            node_status = data['data']['manager_status']['node_status']
+        except Exception:
+            raise CheckException(
+                'Failed to read High Availability (HA) status. This check '
+                'requires HA to be enabled on the cluster. Either ensure '
+                'high availability is configured and running, or disable '
+                'the `ha` check.')
 
-    ha = {
-        'name': 'ha',
-        'master_node': data['data']['manager_status']['master_node'],  # str
-        'quorate': int(data['data']['quorum']['quorate']),  # str -> int
-    }
+        nodes = []
+        for name, item in lrm_status.items():
+            nodes.append({
+                'name': name,
+                'mode': item['mode'],  # str
+                'state': item['state'],  # str
+                'status': node_status[name],  # str
+            })
 
-    return {
-        'ha': [ha],
-        'nodes': nodes,
-    }
+        ha = {
+            'name': 'ha',
+            'master_node':
+                data['data']['manager_status']['master_node'],  # str
+            'quorate': int(data['data']['quorum']['quorate']),  # str -> int
+        }
+
+        return {
+            'ha': [ha],
+            'nodes': nodes,
+        }
