@@ -5,6 +5,7 @@ from ..helpers import api_request
 
 class CheckCluster(Check):
     key = 'cluster'
+    unchanged_eol = 14400
 
     @staticmethod
     async def run(asset: Asset, local_config: dict, config: dict) -> dict:
